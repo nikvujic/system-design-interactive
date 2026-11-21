@@ -4,7 +4,7 @@ A LeetCode-style platform for **system design**. Instead of writing code, users 
 (load balancers, servers, caches, databases, queues, CDNs...), configure them, and run a **realistic traffic
 simulation** to see whether the design meets its targets: latency, error rate, availability, and cost.
 
-> Status: pre-development. This repository currently contains planning documents only.
+> Status: early development (Phase 0: simulation engine spike).
 
 ## Planning documents
 

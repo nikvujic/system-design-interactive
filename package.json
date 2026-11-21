@@ -1,0 +1,22 @@
+{
+  "name": "system-design-interactive",
+  "private": true,
+  "description": "Interactive system design simulator: build architectures, run traffic, see what breaks.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "turbo run typecheck"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.21.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.21.0",
+  "devDependencies": {
+    "turbo": "^2.11.13",
+    "typescript": "^7.0.2"
+  }
+}

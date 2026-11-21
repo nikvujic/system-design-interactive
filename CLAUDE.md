@@ -8,8 +8,8 @@ System Design Interactive is a browser app for learning system design. Users bui
 infrastructure components, run a traffic simulation, and see whether the design meets its latency, error-rate,
 availability and cost targets.
 
-**Status:** planning. The repository contains planning documents only. The next step is Phase 0, the
-headless engine spike ([Roadmap](docs/07-roadmap.md)).
+**Status:** Phase 0, the headless engine spike ([Roadmap](docs/07-roadmap.md)). The monorepo skeleton
+exists; the engine is not implemented yet.
 
 ## Read first
 
@@ -62,7 +62,15 @@ significant technical decisions as ADRs in `docs/adr/` (context, decision, conse
 - Watch engine performance. Benchmarks run in CI once they exist.
 - Conventional commits.
 
-Build, test and run commands will be added here once the monorepo skeleton exists.
+## Commands
+
+Run from the repository root:
+
+| Command | What it does |
+|---|---|
+| `pnpm install` | Install dependencies for all packages |
+| `pnpm typecheck` | Type-check every package (Turborepo, cached) |
+| `pnpm --filter @sdi/engine <script>` | Run a script in one package |
 
 ## Documentation standards
 
