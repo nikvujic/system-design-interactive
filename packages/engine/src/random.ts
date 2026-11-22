@@ -72,7 +72,46 @@ export class RandomStream {
     // 1 - next() is in (0, 1], so the logarithm is always finite.
     return -mean * Math.log(1 - this.next());
   }
+
+  /** A sample from the standard normal distribution (mean 0, standard deviation 1). */
+  normal(): number {
+    // Marsaglia polar method: pick a random point in the unit circle and transform it.
+    // Produces two independent samples per accepted point; the second is kept for the next call.
+    if (this.spareNormal !== undefined) {
+      const spare = this.spareNormal;
+      this.spareNormal = undefined;
+      return spare;
+    }
+    for (;;) {
+      const u = 2 * this.next() - 1;
+      const v = 2 * this.next() - 1;
+      const s = u * u + v * v;
+      if (s > 0 && s < 1) {
+        const factor = Math.sqrt((-2 * Math.log(s)) / s);
+        this.spareNormal = v * factor;
+        return u * factor;
+      }
+    }
+  }
+
+  /**
+   * A sample from a lognormal distribution described the way people describe latency:
+   * by its median (half of values are below it) and its p99 (99% are below it).
+   * Right-skewed: most values sit near the median, a few are much larger.
+   */
+  lognormal(median: number, p99: number): number {
+    if (!(median > 0 && p99 >= median)) {
+      throw new RangeError(`lognormal needs 0 < median <= p99, got median ${median}, p99 ${p99}`);
+    }
+    const sigma = Math.log(p99 / median) / Z_99;
+    return median * Math.exp(sigma * this.normal());
+  }
+
+  private spareNormal: number | undefined = undefined;
 }
+
+/** The point of the standard normal distribution below which 99% of values fall. */
+const Z_99 = 2.326347874040841;
 
 function rotateLeft(value: number, bits: number): number {
   return (value << bits) | (value >>> (32 - bits));

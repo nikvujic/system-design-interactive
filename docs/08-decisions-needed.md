@@ -30,6 +30,9 @@ architecture decision records under `docs/adr/` when the repository is ready for
   as representative defaults?
 - What is the minimum server resource model for the first simulation: CPU, concurrency, bounded queues, or
   some subset?
+- Must results be bit-identical across browsers, or only on the same JavaScript engine? Cross-engine
+  determinism would require engine-independent `log` and `exp` implementations (see
+  [Simulation Engine §2.2](02-simulation-engine.md)). This matters most if server-side grading is added.
 
 ### Implementation
 

@@ -64,6 +64,10 @@ Simulation
    - Event ties broken by a monotonic sequence number.
    - A separate RNG stream per node, so adding a node doesn't change the random numbers other nodes draw.
      This matters: otherwise users see "I added an unrelated node and my DB latency changed".
+   - Known limit: sampling distributions uses `Math.log`, `Math.exp` and `Math.sqrt`. The JavaScript
+     specification requires `Math.sqrt` to be exact but allows `Math.log` and `Math.exp` to differ slightly
+     between engines (V8, SpiderMonkey, JavaScriptCore). Results are reproducible on one engine; identical
+     results across browsers would need engine-independent implementations of those functions.
 2. **The engine is pure TypeScript with no DOM or Node runtime dependencies.** The same engine package can
    run in a browser Web Worker for interactive simulations and in Node.js for server-side grading.
 3. **The engine knows nothing about rendering.** It emits telemetry, and the UI decides what to draw.

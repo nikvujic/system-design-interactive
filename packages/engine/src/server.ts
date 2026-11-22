@@ -1,4 +1,5 @@
 import type { RandomStream } from "./random";
+import type { ServiceTime } from "./service-time";
 import type { Simulation } from "./simulation";
 import type { Micros } from "./time";
 
@@ -16,8 +17,8 @@ export interface ServerConfig {
   cores: number;
   /** Requests that can wait for a free core. Beyond this, new requests are rejected. */
   queueCapacity: number;
-  /** Draws how long one request takes to process. Must return whole microseconds. */
-  serviceTime: (rng: RandomStream) => Micros;
+  /** Draws how long one request takes to process. */
+  serviceTime: ServiceTime;
 }
 
 /** First-in, first-out queue. Avoids `Array.shift()`, which copies the whole array each time. */
