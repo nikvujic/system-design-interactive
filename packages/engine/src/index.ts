@@ -3,7 +3,7 @@ import { DESIGN_SCHEMA_VERSION } from "@sdi/schema";
 export { EventQueue } from "./event-queue";
 export { Histogram } from "./histogram";
 export { createStream, RandomStream } from "./random";
-export { Server, type Outcome, type ServerConfig, type SimRequest } from "./server";
+export { Server, type Outcome, type ServerConfig, type ServerStats, type SimRequest } from "./server";
 export { Simulation, type EventHandler } from "./simulation";
 export { startPoissonSource } from "./source";
 export { MICROS_PER_MS, MICROS_PER_SECOND, ms, seconds, type Micros } from "./time";
