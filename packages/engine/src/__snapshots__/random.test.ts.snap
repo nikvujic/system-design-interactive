@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RandomStream > keeps producing the exact known values (guards against accidental algorithm changes) 1`] = `
+[
+  0.6606157226487994,
+  0.12688010395504534,
+  0.11170196393504739,
+]
+`;

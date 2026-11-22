@@ -1,6 +1,7 @@
 import { DESIGN_SCHEMA_VERSION } from "@sdi/schema";
 
 export { EventQueue } from "./event-queue";
+export { createStream, RandomStream } from "./random";
 export { Simulation, type EventHandler } from "./simulation";
 export { MICROS_PER_MS, MICROS_PER_SECOND, ms, seconds, type Micros } from "./time";
 
