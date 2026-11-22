@@ -117,7 +117,46 @@ export const DesignSchema = z
         ctx.addIssue({ code: "custom", message: `Server "${node.id}" cannot connect onward yet`, path });
       }
     });
+
+    const cycle = findCycle(design.nodes, design.edges);
+    if (cycle) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Connections form a loop (${cycle.join(" -> ")}); requests would circle forever`,
+        path: ["edges"],
+      });
+    }
   });
+
+/** Returns the node ids of one loop in the graph, or `undefined` if there is none. */
+function findCycle(
+  nodes: ReadonlyArray<{ id: string }>,
+  edges: ReadonlyArray<{ from: string; to: string }>,
+): string[] | undefined {
+  const next = new Map<string, string[]>();
+  for (const edge of edges) next.set(edge.from, [...(next.get(edge.from) ?? []), edge.to]);
+
+  const state = new Map<string, "visiting" | "done">();
+  const stack: string[] = [];
+  const visit = (id: string): string[] | undefined => {
+    if (state.get(id) === "done") return undefined;
+    if (state.get(id) === "visiting") return [...stack.slice(stack.indexOf(id)), id];
+    state.set(id, "visiting");
+    stack.push(id);
+    for (const target of next.get(id) ?? []) {
+      const found = visit(target);
+      if (found) return found;
+    }
+    stack.pop();
+    state.set(id, "done");
+    return undefined;
+  };
+  for (const node of nodes) {
+    const found = visit(node.id);
+    if (found) return found;
+  }
+  return undefined;
+}
 
 export type ServiceTimeSpec = z.infer<typeof ServiceTimeSchema>;
 export type ClientsNode = z.infer<typeof ClientsNodeSchema>;

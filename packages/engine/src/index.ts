@@ -3,6 +3,13 @@ import { DESIGN_SCHEMA_VERSION } from "@sdi/schema";
 export { EventQueue } from "./event-queue";
 export { Histogram } from "./histogram";
 export { createStream, RandomStream } from "./random";
+export {
+  runDesign,
+  type LatencySummary,
+  type NodeResult,
+  type RunOptions,
+  type RunResult,
+} from "./run-design";
 export { Server, type Outcome, type ServerConfig, type ServerStats, type SimRequest } from "./server";
 export {
   constantServiceTime,

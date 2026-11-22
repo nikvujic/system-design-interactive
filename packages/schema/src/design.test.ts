@@ -97,6 +97,15 @@ describe("parseDesign", () => {
       expect(errorsOf(design)).toContain('nodes[2]: Server "api-1" cannot connect onward yet');
     });
 
+    it("rejects connections that form a loop", () => {
+      const design = validDesign();
+      design.nodes.push({ id: "lb-2", type: "load_balancer" });
+      design.edges.push({ from: "lb", to: "lb-2" }, { from: "lb-2", to: "lb" });
+      expect(errorsOf(design)).toContain(
+        "edges: Connections form a loop (lb -> lb-2 -> lb); requests would circle forever",
+      );
+    });
+
     it("reports every problem at once, not just the first", () => {
       const design = validDesign();
       design.edges.push({ from: "lb", to: "ghost" }, { from: "api-1", to: "users" });
