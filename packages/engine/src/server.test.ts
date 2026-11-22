@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Histogram } from "./histogram";
 import { createStream } from "./random";
 import { Server, type Outcome, type ServerConfig, type SimRequest } from "./server";
 import { Simulation } from "./simulation";
@@ -82,6 +83,18 @@ describe("Server against queueing theory (M/M/1)", () => {
     expect(latencies.length).toBeGreaterThan(90_000);
     expect(mean).toBeGreaterThan(ms(2) * 0.97);
     expect(mean).toBeLessThan(ms(2) * 1.03);
+  });
+
+  it("matches the predicted p99 latency at 50% utilization", () => {
+    // Theory: in M/M/1, time in system is exponential with rate (mu - lambda),
+    // so p99 = ln(100) / (mu - lambda) = 4.605 * 2 ms = 9.21 ms.
+    const { latencies } = runMM1(2, 500, 1000);
+    const histogram = new Histogram();
+    for (const latency of latencies) histogram.record(latency);
+    const p99 = histogram.percentile(99)!;
+
+    expect(p99).toBeGreaterThan(ms(9.21) * 0.95);
+    expect(p99).toBeLessThan(ms(9.21) * 1.05);
   });
 
   it("produces identical results for the same seed", () => {

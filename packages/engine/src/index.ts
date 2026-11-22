@@ -1,6 +1,7 @@
 import { DESIGN_SCHEMA_VERSION } from "@sdi/schema";
 
 export { EventQueue } from "./event-queue";
+export { Histogram } from "./histogram";
 export { createStream, RandomStream } from "./random";
 export { Server, type Outcome, type ServerConfig, type SimRequest } from "./server";
 export { Simulation, type EventHandler } from "./simulation";
