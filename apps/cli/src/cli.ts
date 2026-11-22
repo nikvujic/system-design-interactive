@@ -29,20 +29,23 @@ Options:
   --seed <integer>      Seed for the random streams; same seed, same result (default 1)
   -h, --help            Show this help`;
 
+const parseCliArgs = (args: string[]) =>
+  parseArgs({
+    args,
+    allowPositionals: true,
+    options: {
+      duration: { type: "string", default: "60" },
+      warmup: { type: "string", default: "5" },
+      seed: { type: "string", default: "1" },
+      help: { type: "boolean", short: "h", default: false },
+    },
+  });
+
 /** Runs the CLI with the given arguments and returns the process exit code. */
 export function runCli(args: string[], io: CliIo): number {
-  let parsed;
+  let parsed: ReturnType<typeof parseCliArgs>;
   try {
-    parsed = parseArgs({
-      args,
-      allowPositionals: true,
-      options: {
-        duration: { type: "string", default: "60" },
-        warmup: { type: "string", default: "5" },
-        seed: { type: "string", default: "1" },
-        help: { type: "boolean", short: "h", default: false },
-      },
-    });
+    parsed = parseCliArgs(args);
   } catch (error) {
     return usageError(io, (error as Error).message);
   }

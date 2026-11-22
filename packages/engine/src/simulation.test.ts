@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Simulation, type EventHandler } from "./simulation";
+import { type EventHandler, Simulation } from "./simulation";
 import { ms, seconds } from "./time";
 
 /** A traffic source that sends one request every `interval`, starting at time 0. */
@@ -28,7 +28,10 @@ describe("Simulation", () => {
   it("lets events schedule further events (a constant-rate traffic source)", () => {
     const sim = new Simulation();
     const arrivals: number[] = [];
-    sim.scheduleAt(0, constantSource(ms(100), (t) => arrivals.push(t)));
+    sim.scheduleAt(
+      0,
+      constantSource(ms(100), (t) => arrivals.push(t)),
+    );
 
     sim.run(seconds(1));
 
@@ -40,12 +43,18 @@ describe("Simulation", () => {
   it("gives the same result whether run in one go or in steps", () => {
     const runInOneGo: number[] = [];
     const one = new Simulation();
-    one.scheduleAt(0, constantSource(ms(70), (t) => runInOneGo.push(t)));
+    one.scheduleAt(
+      0,
+      constantSource(ms(70), (t) => runInOneGo.push(t)),
+    );
     one.run(seconds(2));
 
     const runInSteps: number[] = [];
     const steps = new Simulation();
-    steps.scheduleAt(0, constantSource(ms(70), (t) => runInSteps.push(t)));
+    steps.scheduleAt(
+      0,
+      constantSource(ms(70), (t) => runInSteps.push(t)),
+    );
     for (let t = ms(100); t <= seconds(2); t += ms(100)) {
       steps.run(t);
     }

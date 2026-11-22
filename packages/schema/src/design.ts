@@ -78,7 +78,11 @@ export const DesignSchema = z
     const byId = new Map<string, Node>();
     design.nodes.forEach((node, index) => {
       if (byId.has(node.id)) {
-        ctx.addIssue({ code: "custom", message: `Duplicate node id "${node.id}"`, path: ["nodes", index, "id"] });
+        ctx.addIssue({
+          code: "custom",
+          message: `Duplicate node id "${node.id}"`,
+          path: ["nodes", index, "id"],
+        });
       }
       byId.set(node.id, node);
     });
@@ -89,14 +93,20 @@ export const DesignSchema = z
       const path = ["edges", index];
       const from = byId.get(edge.from);
       const to = byId.get(edge.to);
-      if (!from) ctx.addIssue({ code: "custom", message: `Unknown node "${edge.from}"`, path: [...path, "from"] });
+      if (!from)
+        ctx.addIssue({ code: "custom", message: `Unknown node "${edge.from}"`, path: [...path, "from"] });
       if (!to) ctx.addIssue({ code: "custom", message: `Unknown node "${edge.to}"`, path: [...path, "to"] });
-      if (edge.from === edge.to) ctx.addIssue({ code: "custom", message: "A node cannot connect to itself", path });
+      if (edge.from === edge.to)
+        ctx.addIssue({ code: "custom", message: "A node cannot connect to itself", path });
       const key = `${edge.from}->${edge.to}`;
       if (seenEdges.has(key)) ctx.addIssue({ code: "custom", message: `Duplicate connection ${key}`, path });
       seenEdges.add(key);
       if (to?.type === "clients") {
-        ctx.addIssue({ code: "custom", message: "Clients only send traffic; nothing can connect to them", path });
+        ctx.addIssue({
+          code: "custom",
+          message: "Clients only send traffic; nothing can connect to them",
+          path,
+        });
       }
       outgoing.set(edge.from, (outgoing.get(edge.from) ?? 0) + 1);
     });
@@ -108,10 +118,18 @@ export const DesignSchema = z
       const count = outgoing.get(node.id) ?? 0;
       const path = ["nodes", index];
       if (node.type === "clients" && count !== 1) {
-        ctx.addIssue({ code: "custom", message: `Clients "${node.id}" must connect to exactly one node`, path });
+        ctx.addIssue({
+          code: "custom",
+          message: `Clients "${node.id}" must connect to exactly one node`,
+          path,
+        });
       }
       if (node.type === "load_balancer" && count === 0) {
-        ctx.addIssue({ code: "custom", message: `Load balancer "${node.id}" must connect to at least one node`, path });
+        ctx.addIssue({
+          code: "custom",
+          message: `Load balancer "${node.id}" must connect to at least one node`,
+          path,
+        });
       }
       if (node.type === "server" && count > 0) {
         ctx.addIssue({ code: "custom", message: `Server "${node.id}" cannot connect onward yet`, path });

@@ -18,9 +18,5 @@
       "serviceTime": { "kind": "lognormal", "medianMs": 2, "p99Ms": 8 }
     }
   ],
-  "edges": [
-    { "from": "users", "to": "lb" },
-    { "from": "lb", "to": "api-1" },
-    { "from": "lb", "to": "api-2" }
-  ]
+  "edges": [{ "from": "users", "to": "lb" }, { "from": "lb", "to": "api-1" }, { "from": "lb", "to": "api-2" }]
 }

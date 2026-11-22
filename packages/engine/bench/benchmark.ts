@@ -12,9 +12,9 @@ import {
   createStream,
   lognormalServiceTime,
   ms,
-  seconds,
   Server,
   Simulation,
+  seconds,
   startPoissonSource,
 } from "../src/index";
 
@@ -64,8 +64,7 @@ function runScenario(scenario: Scenario) {
   sim.run(seconds(scenario.durationSeconds));
   const wallMs = performance.now() - start;
 
-  const utilization =
-    servers.reduce((sum, server) => sum + server.stats.utilization, 0) / servers.length;
+  const utilization = servers.reduce((sum, server) => sum + server.stats.utilization, 0) / servers.length;
   return { wallMs, events: sim.eventsProcessed, completed, utilization };
 }
 

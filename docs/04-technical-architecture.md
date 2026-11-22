@@ -55,9 +55,10 @@ system-design-interactive/
 │   ├── schema/              # zod schemas: Design, Component configs, Problem, Scenario, Results
 │   ├── catalog/             # Component definitions: config schema, defaults, tiers, pricing, icons metadata
 │   ├── content/             # Problems (YAML/MDX) + learn cards, validated at build time
-│   ├── ui/                  # Shared UI primitives (design system)
-│   └── tsconfig/ eslint-config/   # shared tooling config
+│   └── ui/                  # Shared UI primitives (design system)
 ├── docs/                    # These planning docs, then ADRs
+├── tsconfig.base.json       # Shared compiler settings, extended by each package
+├── biome.json               # Lint and format rules for the whole repository
 └── turbo.json
 ```
 
@@ -86,6 +87,7 @@ Why this split:
 | Styling | **Tailwind CSS + Radix UI primitives** (shadcn/ui) | Accessible, professional look, fast to build |
 | Worker comms | **Comlink** for commands; raw `postMessage` with transferable `ArrayBuffer`s for frames | Zero-copy for the hot path |
 | Testing | **Vitest** + Testing Library; **Playwright** for E2E | |
+| Lint & format | **Biome** | One tool for both, independent of the TypeScript compiler version. See [ADR 0001](adr/0001-biome-for-lint-and-format.md). |
 
 ### Render loop (important for smoothness)
 

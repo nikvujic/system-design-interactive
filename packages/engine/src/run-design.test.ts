@@ -1,4 +1,4 @@
-import { parseDesign, type Design } from "@sdi/schema";
+import { type Design, parseDesign } from "@sdi/schema";
 import { describe, expect, it } from "vitest";
 import { runDesign } from "./run-design";
 

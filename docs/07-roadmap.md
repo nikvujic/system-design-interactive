@@ -9,7 +9,7 @@ Timeline ranges are estimates, not commitments.
 
 **Goal:** validate the feasibility and performance of the simulation engine before building the UI.
 
-- Monorepo skeleton (pnpm, Turborepo, TS strict, Vitest, ESLint/Prettier, CI).
+- Monorepo skeleton (pnpm, Turborepo, TS strict, Vitest, Biome for lint and format, CI).
 - `@sdi/engine` headless: clock, event queue, seeded RNG, Clients → Server → (LB) topology.
 - Lognormal/exponential service times, bounded queue, rejections.
 - Metrics with HDR histograms.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Histogram } from "./histogram";
 import { createStream } from "./random";
-import { Server, type Outcome, type ServerConfig, type SimRequest } from "./server";
+import { type Outcome, Server, type ServerConfig, type SimRequest } from "./server";
 import { Simulation } from "./simulation";
 import { startPoissonSource } from "./source";
 import { ms, seconds } from "./time";
@@ -24,9 +24,7 @@ const constant5ms = () => ms(5);
 
 describe("Server", () => {
   it("processes a single request in its service time", () => {
-    expect(burst({ cores: 1, queueCapacity: 10, serviceTime: constant5ms }, 1).latencies).toEqual([
-      ms(5),
-    ]);
+    expect(burst({ cores: 1, queueCapacity: 10, serviceTime: constant5ms }, 1).latencies).toEqual([ms(5)]);
   });
 
   it("queues requests while its only core is busy", () => {
@@ -67,9 +65,7 @@ function runMM1(seed: number, arrivalsPerSecond: number, servicePerSecond: numbe
     createStream(seed, "server"),
     (req: SimRequest) => latencies.push(sim.now - req.createdAt),
   );
-  startPoissonSource(sim, createStream(seed, "clients"), arrivalsPerSecond, (req) =>
-    server.receive(req),
-  );
+  startPoissonSource(sim, createStream(seed, "clients"), arrivalsPerSecond, (req) => server.receive(req));
   sim.run(seconds(200));
   return { latencies, events: sim.eventsProcessed };
 }

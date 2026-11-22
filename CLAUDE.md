@@ -58,6 +58,8 @@ significant technical decisions as ADRs in `docs/adr/` (context, decision, conse
 ## Code standards
 
 - TypeScript strict mode. No `any` in `engine` or `schema`.
+- Biome for linting and formatting ([ADR 0001](docs/adr/0001-biome-for-lint-and-format.md)). Run `pnpm format`
+  before handing over changes; CI fails on unformatted code.
 - Tests with Vitest. Engine changes need tests; behavior changes to the simulation need validation-suite or
   golden-scenario coverage ([Simulation engine §2.10](docs/02-simulation-engine.md)).
 - Watch engine performance. Benchmarks run in CI once they exist.
@@ -72,6 +74,8 @@ Run from the repository root:
 | `pnpm install` | Install dependencies for all packages |
 | `pnpm typecheck` | Type-check every package (Turborepo, cached) |
 | `pnpm test` | Run all tests, including the engine validation suite (Turborepo, cached) |
+| `pnpm lint` | Check lint rules and formatting with Biome (fails on any problem) |
+| `pnpm format` | Apply Biome formatting, import sorting and safe lint fixes |
 | `pnpm bench` | Run the engine benchmark (not cached, so it always measures) |
 | `pnpm sim run <design.json>` | Validate and simulate a design file, e.g. `examples/two-servers.json` (`--help` for options) |
 | `pnpm --filter @sdi/engine <script>` | Run a script in one package |

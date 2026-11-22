@@ -4,22 +4,22 @@ export { EventQueue } from "./event-queue";
 export { Histogram } from "./histogram";
 export { createStream, RandomStream } from "./random";
 export {
-  runDesign,
   type LatencySummary,
   type NodeResult,
   type RunOptions,
   type RunResult,
+  runDesign,
 } from "./run-design";
-export { Server, type Outcome, type ServerConfig, type ServerStats, type SimRequest } from "./server";
+export { type Outcome, Server, type ServerConfig, type ServerStats, type SimRequest } from "./server";
 export {
   constantServiceTime,
   exponentialServiceTime,
   lognormalServiceTime,
   type ServiceTime,
 } from "./service-time";
-export { Simulation, type EventHandler } from "./simulation";
+export { type EventHandler, Simulation } from "./simulation";
 export { startPoissonSource } from "./source";
-export { MICROS_PER_MS, MICROS_PER_SECOND, ms, seconds, type Micros } from "./time";
+export { MICROS_PER_MS, MICROS_PER_SECOND, type Micros, ms, seconds } from "./time";
 
 /** Design format versions this engine can run. */
 export const SUPPORTED_SCHEMA_VERSIONS: readonly number[] = [DESIGN_SCHEMA_VERSION];

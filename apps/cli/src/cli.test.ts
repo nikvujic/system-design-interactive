@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { EXIT_FAILED, EXIT_OK, EXIT_USAGE, runCli, type CliIo } from "./cli";
+import { type CliIo, EXIT_FAILED, EXIT_OK, EXIT_USAGE, runCli } from "./cli";
 
 const EXAMPLES_DIR = join(import.meta.dirname, "../../../examples");
 

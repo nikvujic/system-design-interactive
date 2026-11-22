@@ -7,6 +7,8 @@
   "scripts": {
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "bench": "pnpm --filter @sdi/engine bench",
     "sim": "pnpm --filter @sdi/cli sim"
   },
@@ -19,6 +21,7 @@
   },
   "packageManager": "pnpm@12.21.0",
   "devDependencies": {
+    "@biomejs/biome": "2.6.8",
     "turbo": "^2.11.13",
     "typescript": "^7.0.2"
   }

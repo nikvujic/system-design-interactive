@@ -65,9 +65,7 @@ describe("tail latency", () => {
       createStream(1, "server"),
       (request) => latencies.record(sim.now - request.createdAt),
     );
-    startPoissonSource(sim, createStream(1, "clients"), ratePerSecond, (request) =>
-      server.receive(request),
-    );
+    startPoissonSource(sim, createStream(1, "clients"), ratePerSecond, (request) => server.receive(request));
     sim.run(seconds(100));
     return { p50: latencies.percentile(50)!, p99: latencies.percentile(99)! };
   }
