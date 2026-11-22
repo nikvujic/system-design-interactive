@@ -7,9 +7,13 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@sdi/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.1"
   }
 }
