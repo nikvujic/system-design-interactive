@@ -33,6 +33,11 @@ benchmarks:
 - A request crossing 5 hops generates about 10-15 events (arrive, start service, finish, send, receive...).
 - So **~300k-1M requests per wall-clock second**, which covers 10k RPS at 30-100× real time.
 
+**First measurement (Phase 0 benchmark, `pnpm bench`, Node.js 24 on one development machine):** about
+6-7.5 million events/sec for clients → round-robin → 3-8 servers with lognormal service times. 60 s of
+simulated time at 5,000 requests/second took about 80 ms of wall-clock time. Browser Web Worker performance
+is not yet measured.
+
 If measurements support these estimates, they may cover the initial problem set. For larger numbers, use
 **scale presentation** only where equivalence has been validated: a problem can
 say "100k RPS", while the scenario is designed so behavior at 10k RPS with 10× smaller capacities is

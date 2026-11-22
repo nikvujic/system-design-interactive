@@ -70,6 +70,8 @@ Run from the repository root:
 |---|---|
 | `pnpm install` | Install dependencies for all packages |
 | `pnpm typecheck` | Type-check every package (Turborepo, cached) |
+| `pnpm test` | Run all tests, including the engine validation suite (Turborepo, cached) |
+| `pnpm bench` | Run the engine benchmark (not cached, so it always measures) |
 | `pnpm --filter @sdi/engine <script>` | Run a script in one package |
 
 ## Documentation standards

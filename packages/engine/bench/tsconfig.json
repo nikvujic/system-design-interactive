@@ -1,0 +1,8 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // The benchmark is a Node.js script, so unlike the engine code it may use Node's globals.
+    "types": ["node"]
+  },
+  "include": ["."]
+}

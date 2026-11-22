@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "bench": "pnpm --filter @sdi/engine bench"
   },
   "devEngines": {
     "packageManager": {
