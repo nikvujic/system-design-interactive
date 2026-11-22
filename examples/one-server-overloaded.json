@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    { "id": "users", "type": "clients", "requestsPerSecond": 2000 },
+    {
+      "id": "api",
+      "type": "server",
+      "cores": 4,
+      "queueCapacity": 100,
+      "serviceTime": { "kind": "lognormal", "medianMs": 2, "p99Ms": 8 }
+    }
+  ],
+  "edges": [{ "from": "users", "to": "api" }]
+}

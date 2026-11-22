@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`sim run > simulates a design and prints a report 1`] = `
+"Design      two-servers.json (4 nodes, 3 connections)
+Run         20 s simulated, first 5 s excluded as warm-up, seed 1, 0 ms wall time
+
+Requests    30,267 completed, 0 rejected (error rate 0.00%)
+Throughput  2,017.8 req/s
+Latency     p50 2.1 ms · p95 5.6 ms · p99 8.4 ms · max 23.4 ms
+
+Node   Type           Busy  Completed  Rejected
+users  clients           -          -         -
+lb     load_balancer     -          -         -
+api-1  server          60%     20,124         0
+api-2  server          60%     20,123         0"
+`;

@@ -14,7 +14,8 @@ Timeline ranges are estimates, not commitments.
 - Lognormal/exponential service times, bounded queue, rejections.
 - Metrics with HDR histograms.
 - **Validation suite:** M/M/1, M/M/c, Little's Law within tolerance.
-- CLI runner: `pnpm sim run design.json scenario.yaml` → prints metrics table.
+- CLI runner: `pnpm sim run examples/two-servers.json` validates a design file, simulates it and prints a
+  metrics table. Run length, warm-up and seed are command-line options; scripted scenarios come later.
 - Benchmark: events/sec on a reference topology.
 
 **Exit criterion:** the M/M/c validation passes, and a 3-node topology at 5k RPS simulates 60 s of sim

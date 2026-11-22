@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // A command-line app runs in Node.js, so unlike the engine it may use Node's APIs.
+    "types": ["node"]
+  },
+  "include": ["src"]
+}

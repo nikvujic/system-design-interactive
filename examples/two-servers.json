@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    { "id": "users", "type": "clients", "requestsPerSecond": 2000 },
+    { "id": "lb", "type": "load_balancer" },
+    {
+      "id": "api-1",
+      "type": "server",
+      "cores": 4,
+      "queueCapacity": 100,
+      "serviceTime": { "kind": "lognormal", "medianMs": 2, "p99Ms": 8 }
+    },
+    {
+      "id": "api-2",
+      "type": "server",
+      "cores": 4,
+      "queueCapacity": 100,
+      "serviceTime": { "kind": "lognormal", "medianMs": 2, "p99Ms": 8 }
+    }
+  ],
+  "edges": [
+    { "from": "users", "to": "lb" },
+    { "from": "lb", "to": "api-1" },
+    { "from": "lb", "to": "api-2" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@sdi/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Command-line runner: validates a design file, simulates it and prints the results.",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run",
+    "sim": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@sdi/engine": "workspace:*",
+    "@sdi/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "vitest": "^5.1.1"
+  }
+}

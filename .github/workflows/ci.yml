@@ -52,3 +52,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+
+      # Smoke test: the command-line runner simulates an example design end to end.
+      - run: pnpm sim run examples/two-servers.json --duration 10

@@ -9,8 +9,8 @@ infrastructure components, run a traffic simulation, and see whether the design 
 availability and cost targets.
 
 **Status:** Phase 0, the headless engine spike ([Roadmap](docs/07-roadmap.md)). The engine core
-(event loop, seeded randomness, server node, latency histograms) and its validation suite exist; the
-design schema and a command-line runner are in progress. There is no UI yet.
+(event loop, seeded randomness, server node, latency histograms), its validation suite, the design schema
+and a command-line runner exist. There is no UI yet.
 
 ## Read first
 
@@ -73,6 +73,7 @@ Run from the repository root:
 | `pnpm typecheck` | Type-check every package (Turborepo, cached) |
 | `pnpm test` | Run all tests, including the engine validation suite (Turborepo, cached) |
 | `pnpm bench` | Run the engine benchmark (not cached, so it always measures) |
+| `pnpm sim run <design.json>` | Validate and simulate a design file, e.g. `examples/two-servers.json` (`--help` for options) |
 | `pnpm --filter @sdi/engine <script>` | Run a script in one package |
 
 ## Documentation standards

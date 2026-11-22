@@ -171,6 +171,8 @@ export type ParseResult = { ok: true; design: Design } | { ok: false; errors: st
 /**
  * Validates untrusted input (a loaded file, an import, a pasted link) as a design.
  * Errors are readable one-liners with the location, e.g. `nodes[2].cores: Too small: ...`.
+ * Every field-level problem is reported at once. Graph rules (connections, loops) are checked only
+ * once every field is valid, so a design with both kinds of problems reports them in two rounds.
  */
 export function parseDesign(input: unknown): ParseResult {
   const result = DesignSchema.safeParse(input);
