@@ -1,2 +1,19 @@
-/** Version of the saved design format. Bumped when the format changes, with a migration. */
-export const DESIGN_SCHEMA_VERSION = 1;
+export {
+  ClientsNodeSchema,
+  DESIGN_SCHEMA_VERSION,
+  DesignSchema,
+  EdgeSchema,
+  LoadBalancerNodeSchema,
+  NodeSchema,
+  parseDesign,
+  ServerNodeSchema,
+  ServiceTimeSchema,
+  type ClientsNode,
+  type Design,
+  type Edge,
+  type LoadBalancerNode,
+  type Node,
+  type ParseResult,
+  type ServerNode,
+  type ServiceTimeSpec,
+} from "./design";

@@ -8,8 +8,9 @@ System Design Interactive is a browser app for learning system design. Users bui
 infrastructure components, run a traffic simulation, and see whether the design meets its latency, error-rate,
 availability and cost targets.
 
-**Status:** Phase 0, the headless engine spike ([Roadmap](docs/07-roadmap.md)). The monorepo skeleton
-exists; the engine is not implemented yet.
+**Status:** Phase 0, the headless engine spike ([Roadmap](docs/07-roadmap.md)). The engine core
+(event loop, seeded randomness, server node, latency histograms) and its validation suite exist; the
+design schema and a command-line runner are in progress. There is no UI yet.
 
 ## Read first
 
