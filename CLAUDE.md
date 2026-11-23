@@ -8,9 +8,9 @@ System Design Interactive is a browser app for learning system design. Users bui
 infrastructure components, run a traffic simulation, and see whether the design meets its latency, error-rate,
 availability and cost targets.
 
-**Status:** Phase 0, the headless engine spike ([Roadmap](docs/07-roadmap.md)). The engine core
+**Status:** Phase 1, the Sandbox MVP ([Roadmap](docs/07-roadmap.md)). Phase 0 delivered the engine core
 (event loop, seeded randomness, server node, latency histograms), its validation suite, the design schema
-and a command-line runner exist. There is no UI yet.
+and a command-line runner. The web app (`apps/web`) is a skeleton that runs an example design in the browser.
 
 ## Read first
 
@@ -72,6 +72,8 @@ Run from the repository root:
 | Command | What it does |
 |---|---|
 | `pnpm install` | Install dependencies for all packages |
+| `pnpm dev` | Start the web app's dev server (Vite) |
+| `pnpm build` | Build the web app for production into `apps/web/dist` (Turborepo, cached) |
 | `pnpm typecheck` | Type-check every package (Turborepo, cached) |
 | `pnpm test` | Run all tests, including the engine validation suite (Turborepo, cached) |
 | `pnpm lint` | Check lint rules and formatting with Biome (fails on any problem) |
