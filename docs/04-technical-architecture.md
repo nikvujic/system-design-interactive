@@ -85,13 +85,15 @@ Why this split:
 | Forms | **React Hook Form + zod** (schemas from `@sdi/schema`) | One schema validates on client, server and engine |
 | Charts | **uPlot** | Built for high-frequency streaming time series and tiny. Recharts struggles with live data. |
 | Styling | **Tailwind CSS + Radix UI primitives** (shadcn/ui) | Accessible, professional look, fast to build |
-| Worker comms | **Comlink** for commands; raw `postMessage` with transferable `ArrayBuffer`s for frames | Zero-copy for the hot path |
+| Worker comms | Plain `postMessage` with a typed message list (`apps/web/src/simulation/protocol.ts`); transferable `ArrayBuffer`s for particle frames when they arrive | Few message types, and the worker pushes updates on its own timer rather than answering calls, so an RPC library such as Comlink adds little. Every message between the threads is visible in one file. |
 | Testing | **Vitest** + Testing Library; **Playwright** for E2E | |
 | Lint & format | **Biome** | One tool for both, independent of the TypeScript compiler version. See [ADR 0001](adr/0001-biome-for-lint-and-format.md). |
 
 ### Render loop (important for smoothness)
 
-- The engine worker runs sim time ahead in chunks and posts a **frame** at ~30 Hz.
+- The engine worker advances simulated time about 60 times a second, by the wall-clock time since the last
+  step multiplied by the speed. A long gap (a throttled background tab) is capped at 100 ms, so the simulation
+  does not jump ahead. Metrics are posted about 4 times a second; particle frames at ~30 Hz.
 - The main thread uses `requestAnimationFrame` and **interpolates** particle positions between frames,
   so animation is 60 fps even though data arrives at 30 Hz.
 - React does **not** re-render per frame. Node metric badges subscribe to a store slice that updates at ~4 Hz.

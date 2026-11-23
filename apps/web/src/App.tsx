@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { type ExampleRun, runTwoServersExample } from "./example-run";
+import { twoServers } from "./examples";
+import { useSimulation } from "./simulation/use-simulation";
 
 const ms = (value: number) => `${value.toFixed(1)} ms`;
+const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
 
 export function App() {
-  const [result, setResult] = useState<ExampleRun>();
+  const { metrics, playing, error, play, pause } = useSimulation(twoServers);
 
   return (
     <main
@@ -12,24 +13,31 @@ export function App() {
     >
       <h1>System Design Interactive</h1>
       <p>
-        Engine check: simulate <code>examples/two-servers.json</code> for 60 seconds of simulated time, in the
-        browser.
+        <code>examples/two-servers.json</code>, simulated in a Web Worker in real time. Numbers cover the last
+        5 seconds of simulated time.
       </p>
-      <button type="button" onClick={() => setResult(runTwoServersExample(() => performance.now()))}>
-        Run simulation
+      <button type="button" onClick={playing ? pause : play}>
+        {playing ? "Pause" : "Play"}
       </button>
-      {result && (
+      {error && <p role="alert">Simulation error: {error}</p>}
+      {metrics && (
         <dl>
-          <dt>Requests completed</dt>
-          <dd>{result.run.requests.completed.toLocaleString("en-US")}</dd>
+          <dt>Simulated time</dt>
+          <dd>{metrics.timeSeconds.toFixed(1)} s</dd>
+          <dt>Throughput</dt>
+          <dd>{metrics.throughputPerSecond.toFixed(0)} req/s</dd>
           <dt>Error rate</dt>
-          <dd>{(result.run.errorRate * 100).toFixed(2)}%</dd>
+          <dd>{percent(metrics.errorRate)}</dd>
           <dt>Latency p50 / p99</dt>
-          <dd>
-            {result.run.latency ? `${ms(result.run.latency.p50Ms)} / ${ms(result.run.latency.p99Ms)}` : "-"}
-          </dd>
-          <dt>Wall time</dt>
-          <dd>{ms(result.wallMs)}</dd>
+          <dd>{metrics.latency ? `${ms(metrics.latency.p50Ms)} / ${ms(metrics.latency.p99Ms)}` : "-"}</dd>
+          {metrics.nodes
+            .filter((node) => node.utilization !== undefined)
+            .map((node) => (
+              <div key={node.id}>
+                <dt>{node.id} busy</dt>
+                <dd>{percent(node.utilization ?? 0)}</dd>
+              </div>
+            ))}
         </dl>
       )}
     </main>
