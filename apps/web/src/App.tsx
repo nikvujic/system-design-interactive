@@ -1,4 +1,5 @@
 import { DesignCanvas } from "./canvas/DesignCanvas";
+import { RunControls } from "./controls/RunControls";
 import { twoServers } from "./examples";
 import { useSimulation } from "./simulation/use-simulation";
 
@@ -6,7 +7,8 @@ const ms = (value: number) => `${value.toFixed(1)} ms`;
 const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
 
 export function App() {
-  const { metrics, playing, error, play, pause } = useSimulation(twoServers);
+  const simulation = useSimulation(twoServers);
+  const { metrics, error } = simulation;
 
   return (
     <main
@@ -21,6 +23,7 @@ export function App() {
         style={{
           display: "flex",
           alignItems: "center",
+          flexWrap: "wrap",
           gap: 24,
           padding: "8px 16px",
           borderBottom: "1px solid #e5e7eb",
@@ -28,9 +31,7 @@ export function App() {
         }}
       >
         <strong>System Design Interactive</strong>
-        <button type="button" onClick={playing ? pause : play}>
-          {playing ? "Pause" : "Play"}
-        </button>
+        <RunControls design={twoServers} simulation={simulation} />
         {metrics && (
           <>
             <span>t = {metrics.timeSeconds.toFixed(1)} s</span>
