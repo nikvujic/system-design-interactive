@@ -46,10 +46,6 @@ class Fifo<T> {
   }
 }
 
-/**
- * A server with a fixed number of cores and a bounded waiting queue.
- * Arriving requests start on a free core, otherwise wait, otherwise are rejected.
- */
 /** Counters a server keeps about everything it has done so far. */
 export interface ServerStats {
   /** Requests that finished processing. */
@@ -62,8 +58,18 @@ export interface ServerStats {
   averageInFlight: number;
   /** Average share of cores that were busy since time 0, from 0 to 1. */
   utilization: number;
+  /**
+   * Running totals behind the averages: core-microseconds spent busy, and request-microseconds
+   * spent inside the server. Differences between two readings give averages over any period.
+   */
+  busyCoreMicros: number;
+  inFlightMicros: number;
 }
 
+/**
+ * A server with a fixed number of cores and a bounded waiting queue.
+ * Arriving requests start on a free core, otherwise wait, otherwise are rejected.
+ */
 export class Server {
   private busyCores = 0;
   private readonly waiting = new Fifo<SimRequest>();
@@ -108,6 +114,8 @@ export class Server {
       waited: this.waited,
       averageInFlight: now === 0 ? 0 : inFlightArea / now,
       utilization: now === 0 ? 0 : busyCoreArea / now / this.config.cores,
+      busyCoreMicros: busyCoreArea,
+      inFlightMicros: inFlightArea,
     };
   }
 

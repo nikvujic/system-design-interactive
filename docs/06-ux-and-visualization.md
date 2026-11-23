@@ -43,6 +43,9 @@ Provide a color-blind-safe palette.
 - Play / pause / step (advance 100 ms of sim time).
 - Speed: 0.1×, 0.5×, 1×, 5×, 20×, Max (no animation, compute as fast as possible, then show results).
 - **Timeline scrubber** showing scenario events (spike at 30s, failure at 60s) as markers.
+- **Traffic control during a run:** change a clients node's request rate while the simulation runs and
+  watch queues, latency and errors respond. Runs continue until stopped, and metrics cover the last few
+  seconds of simulated time.
 - **Live editing during a run** (Sandbox): change replicas or cache size mid-run and watch the system react.
   It's a strong learning experience ("I added a server and the queue drained"). The engine supports
   reconfiguration as a scheduled event, so it stays deterministic and replayable.

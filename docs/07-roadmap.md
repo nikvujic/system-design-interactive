@@ -30,7 +30,8 @@ time in < 2 s wall time.
 - React app, React Flow canvas, palette, inspector forms generated from zod schemas.
 - Components: Clients, Load Balancer, Server, Database, Cache (wave 1).
 - Handler presets (direct call, cache-aside, read-replica routing).
-- Engine in a Web Worker; play/pause/speed controls.
+- Engine in a Web Worker; play/pause/speed controls. The simulation runs until stopped.
+- Live traffic control: change the request rate during a run and watch the system react.
 - Particle canvas overlay with interpolation.
 - Node heat and live badges; metrics bar; latency/throughput/utilization charts.
 - Save/load designs to local storage; export/import JSON.
@@ -74,7 +75,7 @@ what is happening without additional explanation.
 - Reliability mechanics: retries, circuit breakers, health checks.
 - Traces + waterfall view.
 - First case-study tracks (URL shortener, Rate limiter).
-- Live editing during runs.
+- Live editing of components during runs (adding servers, resizing caches). Traffic changes arrive in Phase 1.
 
 ## Phase 5: Scale & community (later)
 

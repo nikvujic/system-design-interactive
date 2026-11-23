@@ -1,16 +1,9 @@
-import type { Design, Node, ServiceTimeSpec } from "@sdi/schema";
+import type { Design, Node } from "@sdi/schema";
+import { buildDesign } from "./build-design";
 import { Histogram } from "./histogram";
-import { createStream } from "./random";
-import { Server, type SimRequest } from "./server";
-import {
-  constantServiceTime,
-  exponentialServiceTime,
-  lognormalServiceTime,
-  type ServiceTime,
-} from "./service-time";
+import type { SimRequest } from "./server";
 import { Simulation } from "./simulation";
-import { startPoissonSource } from "./source";
-import { MICROS_PER_MS, ms, seconds } from "./time";
+import { MICROS_PER_MS, seconds } from "./time";
 
 export interface RunOptions {
   /** Simulated time to run, in seconds. */
@@ -59,19 +52,6 @@ export interface RunResult {
   eventsProcessed: number;
 }
 
-type Receiver = (request: SimRequest) => void;
-
-function toServiceTime(spec: ServiceTimeSpec): ServiceTime {
-  switch (spec.kind) {
-    case "constant":
-      return constantServiceTime(ms(spec.ms));
-    case "exponential":
-      return exponentialServiceTime(ms(spec.meanMs));
-    case "lognormal":
-      return lognormalServiceTime(ms(spec.medianMs), ms(spec.p99Ms));
-  }
-}
-
 /**
  * Builds the simulation described by a validated design, runs it and summarizes the results.
  * The design must come from `parseDesign`; graph rules (no loops, valid connections) are assumed.
@@ -97,53 +77,11 @@ export function runDesign(design: Design, options: RunOptions): RunResult {
     }
   };
 
-  const targetsOf = (id: string) => design.edges.filter((e) => e.from === id).map((e) => e.to);
-  // Receivers are looked up when a request is delivered, so nodes can be built in any order.
-  const receivers = new Map<string, Receiver>();
-  const deliver = (id: string, request: SimRequest) => receivers.get(id)!(request);
-  const servers = new Map<string, Server>();
-
-  for (const node of design.nodes) {
-    switch (node.type) {
-      case "server": {
-        const server = new Server(
-          sim,
-          {
-            cores: node.cores,
-            queueCapacity: node.queueCapacity,
-            serviceTime: toServiceTime(node.serviceTime),
-          },
-          createStream(options.seed, node.id),
-          record,
-        );
-        servers.set(node.id, server);
-        receivers.set(node.id, (request) => server.receive(request));
-        break;
-      }
-      case "load_balancer": {
-        const targets = targetsOf(node.id);
-        let next = 0;
-        receivers.set(node.id, (request) => {
-          const target = targets[next]!;
-          next = (next + 1) % targets.length;
-          deliver(target, request);
-        });
-        break;
-      }
-      case "clients": {
-        const target = targetsOf(node.id)[0]!;
-        startPoissonSource(sim, createStream(options.seed, node.id), node.requestsPerSecond, (request) =>
-          deliver(target, request),
-        );
-        break;
-      }
-    }
-  }
+  const { servers } = buildDesign(sim, design, options.seed, record);
 
   sim.run(seconds(options.durationSeconds));
 
   const measuredSeconds = options.durationSeconds - warmupSeconds;
-  const toMs = (micros: number) => micros / MICROS_PER_MS;
   const finished = completed + rejected;
   return {
     durationSeconds: options.durationSeconds,
@@ -151,16 +89,7 @@ export function runDesign(design: Design, options: RunOptions): RunResult {
     requests: { completed, rejected },
     errorRate: finished === 0 ? 0 : rejected / finished,
     throughputPerSecond: completed / measuredSeconds,
-    latency:
-      latencies.count === 0
-        ? undefined
-        : {
-            meanMs: toMs(latencies.mean!),
-            p50Ms: toMs(latencies.percentile(50)!),
-            p95Ms: toMs(latencies.percentile(95)!),
-            p99Ms: toMs(latencies.percentile(99)!),
-            maxMs: toMs(latencies.max!),
-          },
+    latency: summarizeLatency(latencies),
     nodes: design.nodes.map((node) => {
       const server = servers.get(node.id);
       if (!server) return { id: node.id, type: node.type };
@@ -175,5 +104,18 @@ export function runDesign(design: Design, options: RunOptions): RunResult {
       };
     }),
     eventsProcessed: sim.eventsProcessed,
+  };
+}
+
+/** Client-side latency percentiles in milliseconds, or `undefined` if nothing was recorded. */
+export function summarizeLatency(latencies: Histogram): LatencySummary | undefined {
+  if (latencies.count === 0) return undefined;
+  const toMs = (micros: number) => micros / MICROS_PER_MS;
+  return {
+    meanMs: toMs(latencies.mean!),
+    p50Ms: toMs(latencies.percentile(50)!),
+    p95Ms: toMs(latencies.percentile(95)!),
+    p99Ms: toMs(latencies.percentile(99)!),
+    maxMs: toMs(latencies.max!),
   };
 }

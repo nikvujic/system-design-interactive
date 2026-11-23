@@ -325,7 +325,10 @@ Plus:
 The engine emits three streams, at different fidelities:
 
 1. **Metrics (aggregated, always on)**
-   - Per node and per edge, in rolling 1-second sim-time windows: throughput, errors by type, utilization, queue depth, in-flight, memory.
+   - Per node and per edge, in rolling sim-time windows: throughput, errors by type, utilization, queue depth, in-flight, memory.
+     Results are collected in 250 ms buckets of simulated time, and a window (up to the last 10 s) combines the
+     most recent buckets. A long-running interactive simulation therefore shows what is happening *now*;
+     totals since the start would hide a recent spike behind earlier normal traffic.
    - Latency histograms with **HDR Histogram or DDSketch**, so p50/p95/p99/p999 are accurate and mergeable.
      Never compute percentiles by averaging.
    - End-to-end client-observed latency (this is what SLOs are judged on).
@@ -359,6 +362,9 @@ and node state snapshots. No JSON per request.
 - Object pooling for requests and events (avoid GC churn, which matters a lot in JS).
 - Struct-of-arrays / typed arrays in hot paths if needed.
 - An event budget per frame in interactive mode, so the UI never freezes; the sim runs ahead in chunks.
+- Interactive runs advance simulated time in slices. Slicing does not change results: running 12 s in
+  one step or in 120 steps of 100 ms produces identical metrics. Traffic changes take effect at the
+  simulated time they are applied, so a recorded sequence of changes replays exactly.
 - Benchmarks in CI (events/sec on a reference topology) to catch performance regressions.
 - If JS ever becomes the bottleneck, the engine boundary is clean enough to port the core to Rust → WASM
   without touching the UI. **Don't start there.** TS is easier to iterate on while the model is still changing.
