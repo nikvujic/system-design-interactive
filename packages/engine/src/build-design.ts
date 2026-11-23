@@ -1,4 +1,5 @@
 import type { Design, ServiceTimeSpec } from "@sdi/schema";
+import type { ParticleSampler } from "./particles";
 import { createStream } from "./random";
 import { type Outcome, Server, type SimRequest } from "./server";
 import {
@@ -33,18 +34,23 @@ function toServiceTime(spec: ServiceTimeSpec): ServiceTime {
 /**
  * Creates the nodes of a validated design inside `sim` and starts its traffic.
  * The design must come from `parseDesign`; graph rules (no loops, valid connections) are assumed.
- * `onClientResult` is called once per request, when it completes or is rejected.
+ * `onClientResult` is called once per request, when it completes or is rejected. With a
+ * `particles` sampler, sampled requests also report their hops and outcomes for animation.
  */
 export function buildDesign(
   sim: Simulation,
   design: Design,
   seed: number,
   onClientResult: (request: SimRequest, outcome: Outcome) => void,
+  particles?: ParticleSampler,
 ): BuiltDesign {
   const targetsOf = (id: string) => design.edges.filter((e) => e.from === id).map((e) => e.to);
   // Receivers are looked up when a request is delivered, so nodes can be built in any order.
   const receivers = new Map<string, Receiver>();
-  const deliver = (id: string, request: SimRequest) => receivers.get(id)!(request);
+  const deliver = (from: string, to: string, request: SimRequest) => {
+    particles?.hop(request, from, to, sim.now);
+    receivers.get(to)!(request);
+  };
   const servers = new Map<string, Server>();
   const sources = new Map<string, PoissonSource>();
 
@@ -59,7 +65,10 @@ export function buildDesign(
             serviceTime: toServiceTime(node.serviceTime),
           },
           createStream(seed, node.id),
-          onClientResult,
+          (request, outcome) => {
+            particles?.done(request, node.id, outcome, sim.now);
+            onClientResult(request, outcome);
+          },
         );
         servers.set(node.id, server);
         receivers.set(node.id, (request) => server.receive(request));
@@ -71,7 +80,7 @@ export function buildDesign(
         receivers.set(node.id, (request) => {
           const target = targets[next]!;
           next = (next + 1) % targets.length;
-          deliver(target, request);
+          deliver(node.id, target, request);
         });
         break;
       }
@@ -81,7 +90,10 @@ export function buildDesign(
           sim,
           createStream(seed, node.id),
           node.requestsPerSecond,
-          (request) => deliver(target, request),
+          (request) => {
+            particles?.sample(request, source.ratePerSecond);
+            deliver(node.id, target, request);
+          },
         );
         sources.set(node.id, source);
         break;

@@ -10,6 +10,7 @@ export {
   type LiveNodeMetrics,
   LiveRun,
 } from "./live-run";
+export { MAX_BUFFERED_PARTICLES, type Particle, ParticleSampler } from "./particles";
 export { createStream, RandomStream } from "./random";
 export {
   type LatencySummary,

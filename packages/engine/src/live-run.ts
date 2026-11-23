@@ -1,6 +1,8 @@
 import type { Design, Node } from "@sdi/schema";
 import { buildDesign } from "./build-design";
 import { Histogram } from "./histogram";
+import { type Particle, ParticleSampler } from "./particles";
+import { createStream } from "./random";
 import { type LatencySummary, summarizeLatency } from "./run-design";
 import type { Server, SimRequest } from "./server";
 import { Simulation } from "./simulation";
@@ -72,13 +74,20 @@ export class LiveRun {
   private readonly servers: Map<string, Server>;
   private readonly sources: Map<string, PoissonSource>;
   private readonly buckets: Bucket[] = [];
+  private readonly particles: ParticleSampler;
 
   constructor(
     private readonly design: Design,
     options: { seed: number },
   ) {
-    const built = buildDesign(this.sim, design, options.seed, (request, outcome) =>
-      this.record(request, outcome),
+    // "#" cannot appear in a node id, so this stream never coincides with a node's stream.
+    this.particles = new ParticleSampler(createStream(options.seed, "#particles"));
+    const built = buildDesign(
+      this.sim,
+      design,
+      options.seed,
+      (request, outcome) => this.record(request, outcome),
+      this.particles,
     );
     this.servers = built.servers;
     this.sources = built.sources;
@@ -105,6 +114,19 @@ export class LiveRun {
     const source = this.sources.get(nodeId);
     if (!source) throw new Error(`"${nodeId}" is not a clients node in this design`);
     source.setRate(requestsPerSecond);
+  }
+
+  /**
+   * How many requests per simulated second each traffic source turns into particles for
+   * animation (default 0, off). Sampling never changes the simulation's results.
+   */
+  setParticlesPerSecond(perSecond: number): void {
+    this.particles.particlesPerSecond = perSecond;
+  }
+
+  /** The particles produced since the last call, oldest first. */
+  drainParticles(): Particle[] {
+    return this.particles.drain();
   }
 
   /**

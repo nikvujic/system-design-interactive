@@ -345,9 +345,17 @@ At 5,000 RPS, rendering every request hop would produce too many particles for a
 Simulation and animation therefore use separate levels of detail:
 
 - **Speed control**: 0.1× (slow motion to watch individual requests) ... 1× ... 100× (fast-forward a 10-minute scenario).
-- **Particle sampling**: the engine emits a particle for a sample of request hops, targeting a fixed visual
-  budget (e.g. ≤ 1,500 on-screen particles). The sampling rate adapts per edge so low-traffic edges still
-  show dots. **Particle density per edge is proportional to (log-scaled) throughput**, so busy paths look busy.
+- **Particle sampling**: the engine emits particles for a sample of requests, targeting a fixed visual
+  budget (e.g. ≤ 1,500 on-screen particles). A sampled request reports each hop along a connection and its
+  outcome (processed or rejected) at the node that finished it. The current implementation:
+  - The caller sets a target number of sampled requests per simulated second, per traffic source, so a
+    quiet source still shows particles next to a busy one.
+  - Requests are sampled at random from a dedicated random stream. Turning particles on or off never
+    changes the simulation's results. Evenly spaced sampling (every n-th request) is avoided because it
+    lines up with regular patterns such as round robin and leaves some connections without particles.
+  - Hops take no simulated time until links have latency (§2.6). The UI animates each hop over a short
+    visual duration.
+  - Later: **particle density per edge proportional to (log-scaled) throughput**, so busy paths look busy.
 - Particles carry **status color** (ok / slow / error / retry), so a failing path turns red visibly.
 - **Queue visualization**: dots stack up at the node entrance as its queue grows, making congestion visible.
 

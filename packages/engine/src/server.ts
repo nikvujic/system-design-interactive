@@ -8,6 +8,8 @@ export interface SimRequest {
   id: number;
   /** When the client sent it. Latency is measured from here. */
   createdAt: Micros;
+  /** Set when the request was sampled for animation (see `ParticleSampler`). */
+  particleId?: number;
 }
 
 export type Outcome = "ok" | "rejected";
