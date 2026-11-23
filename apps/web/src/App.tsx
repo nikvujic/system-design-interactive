@@ -1,3 +1,4 @@
+import { DesignCanvas } from "./canvas/DesignCanvas";
 import { twoServers } from "./examples";
 import { useSimulation } from "./simulation/use-simulation";
 
@@ -9,37 +10,44 @@ export function App() {
 
   return (
     <main
-      style={{ fontFamily: "system-ui, sans-serif", maxWidth: 640, margin: "4rem auto", padding: "0 1rem" }}
+      style={{
+        fontFamily: "system-ui, sans-serif",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
     >
-      <h1>System Design Interactive</h1>
-      <p>
-        <code>examples/two-servers.json</code>, simulated in a Web Worker in real time. Numbers cover the last
-        5 seconds of simulated time.
-      </p>
-      <button type="button" onClick={playing ? pause : play}>
-        {playing ? "Pause" : "Play"}
-      </button>
-      {error && <p role="alert">Simulation error: {error}</p>}
-      {metrics && (
-        <dl>
-          <dt>Simulated time</dt>
-          <dd>{metrics.timeSeconds.toFixed(1)} s</dd>
-          <dt>Throughput</dt>
-          <dd>{metrics.throughputPerSecond.toFixed(0)} req/s</dd>
-          <dt>Error rate</dt>
-          <dd>{percent(metrics.errorRate)}</dd>
-          <dt>Latency p50 / p99</dt>
-          <dd>{metrics.latency ? `${ms(metrics.latency.p50Ms)} / ${ms(metrics.latency.p99Ms)}` : "-"}</dd>
-          {metrics.nodes
-            .filter((node) => node.utilization !== undefined)
-            .map((node) => (
-              <div key={node.id}>
-                <dt>{node.id} busy</dt>
-                <dd>{percent(node.utilization ?? 0)}</dd>
-              </div>
-            ))}
-        </dl>
-      )}
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 24,
+          padding: "8px 16px",
+          borderBottom: "1px solid #e5e7eb",
+          fontSize: 14,
+        }}
+      >
+        <strong>System Design Interactive</strong>
+        <button type="button" onClick={playing ? pause : play}>
+          {playing ? "Pause" : "Play"}
+        </button>
+        {metrics && (
+          <>
+            <span>t = {metrics.timeSeconds.toFixed(1)} s</span>
+            <span>{metrics.throughputPerSecond.toFixed(0)} req/s</span>
+            <span>errors {percent(metrics.errorRate)}</span>
+            <span>
+              p50 / p99{" "}
+              {metrics.latency ? `${ms(metrics.latency.p50Ms)} / ${ms(metrics.latency.p99Ms)}` : "-"}
+            </span>
+            <span style={{ color: "#6b7280" }}>last {metrics.windowSeconds.toFixed(0)} s</span>
+          </>
+        )}
+        {error && <span role="alert">Simulation error: {error}</span>}
+      </header>
+      <div style={{ flex: 1 }}>
+        <DesignCanvas design={twoServers} metrics={metrics?.nodes} />
+      </div>
     </main>
   );
 }

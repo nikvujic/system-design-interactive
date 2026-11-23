@@ -35,6 +35,9 @@ Left panel collapses to a story/problem tab in Problem mode.
 | Cache | Hit/miss split: hits return early (green short loop), misses continue to DB |
 | Live badge | Small per-node text: `1.2k/s · p99 45ms` (updated ~4 Hz, not every frame) |
 
+**Layout:** nodes keep the position saved in the design. Nodes without one (for example in a hand-written or
+imported file) are placed automatically, in columns by distance from the traffic source, left to right.
+
 **Accessibility:** color is never the only signal. Errors also use shape (× marks), and status uses icons.
 Provide a color-blind-safe palette.
 
