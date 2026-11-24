@@ -126,4 +126,33 @@ describe("LiveRun", () => {
     expect(() => run.setRequestsPerSecond("users", -1)).toThrow(RangeError);
     expect(() => run.metrics(11)).toThrow(RangeError);
   });
+
+  it("reports the traffic on each connection", () => {
+    const run = new LiveRun(twoServers, { seed: 1 });
+    run.advance(seconds(10));
+    const edges = run.metrics().edges;
+    expect(edges.map((e) => `${e.from}->${e.to}`)).toEqual(["users->lb", "lb->api-1", "lb->api-2"]);
+    const [toLb, toApi1, toApi2] = edges;
+    expect(toLb!.requestsPerSecond).toBeGreaterThan(1_900);
+    expect(toLb!.requestsPerSecond).toBeLessThan(2_100);
+    // Round robin splits the load balancer's traffic in half.
+    expect(toApi1!.requestsPerSecond).toBeCloseTo(toLb!.requestsPerSecond / 2, -1);
+    expect(toApi2!.requestsPerSecond).toBeCloseTo(toLb!.requestsPerSecond / 2, -1);
+    expect(edges.every((e) => e.rejectedPerSecond === 0)).toBe(true);
+  });
+
+  it("counts rejections on every connection the rejected requests travelled", () => {
+    const run = new LiveRun(twoServers, { seed: 1 });
+    run.setRequestsPerSecond("users", 6000);
+    run.advance(seconds(10));
+    const metrics = run.metrics();
+    const [toLb, toApi1, toApi2] = metrics.edges;
+    const share = (e: typeof toLb) => e!.rejectedPerSecond / e!.requestsPerSecond;
+    // Each server is overloaded the same way, so each connection fails about as often as the whole.
+    expect(share(toLb)).toBeCloseTo(metrics.errorRate, 1);
+    expect(share(toApi1)).toBeGreaterThan(0.3);
+    expect(share(toApi2)).toBeGreaterThan(0.3);
+    // Rejections on the load balancer's connections add up to those on the way in.
+    expect(toApi1!.rejectedPerSecond + toApi2!.rejectedPerSecond).toBeCloseTo(toLb!.rejectedPerSecond, 0);
+  });
 });

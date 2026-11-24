@@ -31,25 +31,35 @@ function toServiceTime(spec: ServiceTimeSpec): ServiceTime {
   }
 }
 
+/** Optional observers of what happens inside a built design. */
+export interface BuildObservers {
+  /** Sampled requests also report their hops and outcomes for animation. */
+  particles?: ParticleSampler;
+  /** Called for every request that travels a connection, with the connection's index in `design.edges`. */
+  onHop?: (request: SimRequest, edgeIndex: number) => void;
+}
+
 /**
  * Creates the nodes of a validated design inside `sim` and starts its traffic.
  * The design must come from `parseDesign`; graph rules (no loops, valid connections) are assumed.
- * `onClientResult` is called once per request, when it completes or is rejected. With a
- * `particles` sampler, sampled requests also report their hops and outcomes for animation.
+ * `onClientResult` is called once per request, when it completes or is rejected.
  */
 export function buildDesign(
   sim: Simulation,
   design: Design,
   seed: number,
   onClientResult: (request: SimRequest, outcome: Outcome) => void,
-  particles?: ParticleSampler,
+  { particles, onHop }: BuildObservers = {},
 ): BuiltDesign {
-  const targetsOf = (id: string) => design.edges.filter((e) => e.from === id).map((e) => e.to);
+  /** Indexes in `design.edges` of the connections leaving `id`, in order. */
+  const edgesFrom = (id: string) => design.edges.flatMap((edge, index) => (edge.from === id ? [index] : []));
   // Receivers are looked up when a request is delivered, so nodes can be built in any order.
   const receivers = new Map<string, Receiver>();
-  const deliver = (from: string, to: string, request: SimRequest) => {
-    particles?.hop(request, from, to, sim.now);
-    receivers.get(to)!(request);
+  const deliver = (edgeIndex: number, request: SimRequest) => {
+    const edge = design.edges[edgeIndex]!;
+    particles?.hop(request, edge.from, edge.to, sim.now);
+    onHop?.(request, edgeIndex);
+    receivers.get(edge.to)!(request);
   };
   const servers = new Map<string, Server>();
   const sources = new Map<string, PoissonSource>();
@@ -75,24 +85,24 @@ export function buildDesign(
         break;
       }
       case "load_balancer": {
-        const targets = targetsOf(node.id);
+        const outgoing = edgesFrom(node.id);
         let next = 0;
         receivers.set(node.id, (request) => {
-          const target = targets[next]!;
-          next = (next + 1) % targets.length;
-          deliver(node.id, target, request);
+          const edgeIndex = outgoing[next]!;
+          next = (next + 1) % outgoing.length;
+          deliver(edgeIndex, request);
         });
         break;
       }
       case "clients": {
-        const target = targetsOf(node.id)[0]!;
+        const edgeIndex = edgesFrom(node.id)[0]!;
         const source = startPoissonSource(
           sim,
           createStream(seed, node.id),
           node.requestsPerSecond,
           (request) => {
             particles?.sample(request, source.ratePerSecond);
-            deliver(node.id, target, request);
+            deliver(edgeIndex, request);
           },
         );
         sources.set(node.id, source);

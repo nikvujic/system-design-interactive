@@ -10,6 +10,8 @@ export interface SimRequest {
   createdAt: Micros;
   /** Set when the request was sampled for animation (see `ParticleSampler`). */
   particleId?: number;
+  /** Live runs only: indexes of the connections the request travelled, in order. */
+  route?: number[];
 }
 
 export type Outcome = "ok" | "rejected";

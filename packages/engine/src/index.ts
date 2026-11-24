@@ -1,11 +1,12 @@
 import { DESIGN_SCHEMA_VERSION } from "@sdi/schema";
 
-export { type BuiltDesign, buildDesign } from "./build-design";
+export { type BuildObservers, type BuiltDesign, buildDesign } from "./build-design";
 export { EventQueue } from "./event-queue";
 export { Histogram } from "./histogram";
 export {
   LIVE_BUCKET,
   LIVE_MAX_WINDOW_SECONDS,
+  type LiveEdgeMetrics,
   type LiveMetrics,
   type LiveNodeMetrics,
   LiveRun,

@@ -30,6 +30,19 @@ export interface LiveNodeMetrics {
   queueLength?: number;
 }
 
+/** Traffic on one connection over the window. */
+export interface LiveEdgeMetrics {
+  from: string;
+  to: string;
+  /** Requests that travelled the connection, per second. */
+  requestsPerSecond: number;
+  /**
+   * Requests per second that travelled the connection and were then rejected, here or further
+   * along. Divided by `requestsPerSecond`, it gives the share of the connection's traffic that fails.
+   */
+  rejectedPerSecond: number;
+}
+
 export interface LiveMetrics {
   /** Simulated time, in seconds since the start of the run. */
   timeSeconds: number;
@@ -42,6 +55,8 @@ export interface LiveMetrics {
   throughputPerSecond: number;
   latency: LatencySummary | undefined;
   nodes: LiveNodeMetrics[];
+  /** One entry per connection, in the order of `design.edges`. */
+  edges: LiveEdgeMetrics[];
   /** Simulation work done since the start; useful for performance reporting. */
   eventsProcessed: number;
 }
@@ -61,6 +76,9 @@ interface Bucket {
   latencies: Histogram;
   /** Server totals when the bucket started, by node id. */
   servers: Map<string, ServerReading>;
+  /** Per connection (index in `design.edges`): requests that travelled it, and of those, rejections. */
+  edgeRequests: number[];
+  edgeRejected: number[];
 }
 
 /**
@@ -87,7 +105,14 @@ export class LiveRun {
       design,
       options.seed,
       (request, outcome) => this.record(request, outcome),
-      this.particles,
+      {
+        particles: this.particles,
+        onHop: (request, edgeIndex) => {
+          this.currentBucket().edgeRequests[edgeIndex]!++;
+          if (request.route) request.route.push(edgeIndex);
+          else request.route = [edgeIndex];
+        },
+      },
     );
     this.servers = built.servers;
     this.sources = built.sources;
@@ -150,10 +175,18 @@ export class LiveRun {
     const latencies = new Histogram();
     let completed = 0;
     let rejected = 0;
+    const edgeRequests = this.design.edges.map(() => 0);
+    const edgeRejected = this.design.edges.map(() => 0);
     for (const bucket of window) {
       completed += bucket.completed;
       rejected += bucket.rejected;
       latencies.merge(bucket.latencies);
+      bucket.edgeRequests.forEach((count, i) => {
+        edgeRequests[i]! += count;
+      });
+      bucket.edgeRejected.forEach((count, i) => {
+        edgeRejected[i]! += count;
+      });
     }
     const finished = completed + rejected;
 
@@ -189,17 +222,28 @@ export class LiveRun {
           queueLength: server.queueLength,
         };
       }),
+      edges: this.design.edges.map((edge, i) => ({
+        from: edge.from,
+        to: edge.to,
+        requestsPerSecond: perSecond(edgeRequests[i]!),
+        rejectedPerSecond: perSecond(edgeRejected[i]!),
+      })),
       eventsProcessed: this.sim.eventsProcessed,
     };
   }
 
+  private currentBucket(): Bucket {
+    return this.buckets[this.buckets.length - 1]!;
+  }
+
   private record(request: SimRequest, outcome: "ok" | "rejected"): void {
-    const bucket = this.buckets[this.buckets.length - 1]!;
+    const bucket = this.currentBucket();
     if (outcome === "ok") {
       bucket.completed++;
       bucket.latencies.record(this.sim.now - request.createdAt);
     } else {
       bucket.rejected++;
+      for (const edgeIndex of request.route ?? []) bucket.edgeRejected[edgeIndex]!++;
     }
   }
 
@@ -215,6 +259,8 @@ export class LiveRun {
       rejected: 0,
       latencies: new Histogram(),
       servers,
+      edgeRequests: this.design.edges.map(() => 0),
+      edgeRejected: this.design.edges.map(() => 0),
     });
     if (this.buckets.length > MAX_BUCKETS + 1) this.buckets.shift();
   }
