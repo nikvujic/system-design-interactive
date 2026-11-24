@@ -1,5 +1,6 @@
 import { Handle, type NodeProps, type NodeTypes, Position } from "@xyflow/react";
 import type { ReactNode } from "react";
+import { useNodeMetrics } from "./live-store";
 import type { CanvasNode } from "./to-flow";
 
 type Props = NodeProps<CanvasNode>;
@@ -45,8 +46,9 @@ function Box(props: {
 }
 
 function ClientsNode({ data }: Props) {
+  const metrics = useNodeMetrics(data.node.id);
   if (data.node.type !== "clients") return null;
-  const rate = data.metrics?.requestsPerSecond ?? data.node.requestsPerSecond;
+  const rate = metrics?.requestsPerSecond ?? data.node.requestsPerSecond;
   return (
     <Box title={data.node.id} kind="Clients" outputs>
       sending {perSecond(rate)}
@@ -64,8 +66,8 @@ function LoadBalancerNode({ data }: Props) {
 }
 
 function ServerNode({ data }: Props) {
+  const m = useNodeMetrics(data.node.id);
   if (data.node.type !== "server") return null;
-  const m = data.metrics;
   const level = heat(m?.utilization);
   return (
     <Box title={data.node.id} kind={`Server · ${data.node.cores} cores`} border={HEAT_COLOR[level]} inputs>

@@ -40,13 +40,11 @@ describe("toFlow", () => {
       ["api-1", "server"],
       ["api-2", "server"],
     ]);
-    expect(edges.map((e) => e.id)).toEqual(["users->lb", "lb->api-1", "lb->api-2"]);
-  });
-
-  it("attaches each node's live metrics", () => {
-    const { nodes } = toFlow(twoServers, [{ id: "api-1", type: "server", utilization: 0.6 }]);
-    expect(nodes.find((n) => n.id === "api-1")!.data.metrics?.utilization).toBe(0.6);
-    expect(nodes.find((n) => n.id === "api-2")!.data.metrics).toBeUndefined();
+    expect(edges.map((e) => [e.id, e.type, e.data?.index])).toEqual([
+      ["users->lb", "traffic", 0],
+      ["lb->api-1", "traffic", 1],
+      ["lb->api-2", "traffic", 2],
+    ]);
   });
 });
 

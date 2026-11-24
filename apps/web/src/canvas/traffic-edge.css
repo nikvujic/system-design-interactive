@@ -1,0 +1,20 @@
+/*
+ * A connection with traffic: React Flow's own animated-edge look (thin line, moving dashes, its
+ * `dashdraw` animation). The browser runs the animation, so it stays smooth however busy the page is.
+ */
+.react-flow__edge-path.traffic-flowing {
+  stroke: #64748b;
+  stroke-width: 1.5;
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+.react-flow__edge-path.traffic-flowing.traffic-paused {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__edge-path.traffic-flowing {
+    animation: none;
+  }
+}

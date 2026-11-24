@@ -47,7 +47,7 @@ export function App() {
         {error && <span role="alert">Simulation error: {error}</span>}
       </header>
       <div style={{ flex: 1 }}>
-        <DesignCanvas design={twoServers} metrics={metrics?.nodes} />
+        <DesignCanvas design={twoServers} live={simulation.live} />
       </div>
     </main>
   );

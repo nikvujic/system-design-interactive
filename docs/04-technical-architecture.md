@@ -15,10 +15,10 @@ below describes a possible later phase if server-side grading or account-backed 
 │                                                                  │
 │  React App (Vite)                                                │
 │   ├── Editor canvas (React Flow)  ◄── design state (Zustand)     │
-│   ├── Particle overlay (Canvas2D / PixiJS)                       │
+│   ├── Traffic on connections (animated edges, live store)        │
 │   ├── Inspector panels, config forms (zod-driven)                │
 │   └── Metrics dashboards (uPlot)                                 │
-│            ▲  frames (typed arrays, ~30Hz)    │ commands          │
+│            ▲  metrics (1 Hz)                 │ commands          │
 │            │                                  ▼                  │
 │  Web Worker: @sdi/engine  (same package the server uses)         │
 └──────────────────────────────┬───────────────────────────────────┘
@@ -78,14 +78,14 @@ Why this split:
 | Build | **Vite** | Fast, first-class worker support |
 | Routing | **TanStack Router** (or React Router v7) | Type-safe routes |
 | Graph editor | **React Flow (@xyflow/react)** | Industry standard for node editors; custom nodes are plain React components; handles pan/zoom/selection/minimap |
-| Particles ("dots") | **Single Canvas overlay** (Canvas2D first, PixiJS/WebGL if needed) | Animating thousands of SVG elements inside React Flow edges would drop frames. One canvas, synced to the React Flow viewport transform, draws all particles in one pass. |
+| Traffic on connections | **CSS-animated dashes inside a custom React Flow edge**, with a label for the numbers | Follows React Flow's own edge path, runs in the browser's animation engine rather than per-frame JavaScript, and costs the same at any traffic. A canvas overlay remains an option for a later per-request trace view. See [ADR 0002](adr/0002-traffic-shown-on-connections.md). |
 | App state | **Zustand** (+ Immer) | Simple, fast, works with React Flow's own store patterns |
 | Undo/redo | Command pattern on the design store (or `zundo`) | Expected in any professional editor |
 | Server state | **TanStack Query** | Caching, retries |
 | Forms | **React Hook Form + zod** (schemas from `@sdi/schema`) | One schema validates on client, server and engine |
 | Charts | **uPlot** | Built for high-frequency streaming time series and tiny. Recharts struggles with live data. |
 | Styling | **Tailwind CSS + Radix UI primitives** (shadcn/ui) | Accessible, professional look, fast to build |
-| Worker comms | Plain `postMessage` with a typed message list (`apps/web/src/simulation/protocol.ts`); transferable `ArrayBuffer`s for particle frames when they arrive | Few message types, and the worker pushes updates on its own timer rather than answering calls, so an RPC library such as Comlink adds little. Every message between the threads is visible in one file. |
+| Worker comms | Plain `postMessage` with a typed message list (`apps/web/src/simulation/protocol.ts`); transferable `ArrayBuffer`s if a high-volume stream (such as request traces) is added | Few message types, and the worker pushes updates on its own timer rather than answering calls, so an RPC library such as Comlink adds little. Every message between the threads is visible in one file. |
 | Testing | **Vitest** + Testing Library; **Playwright** for E2E | |
 | Lint & format | **Biome** | One tool for both, independent of the TypeScript compiler version. See [ADR 0001](adr/0001-biome-for-lint-and-format.md). |
 
@@ -93,10 +93,15 @@ Why this split:
 
 - The engine worker advances simulated time about 60 times a second, by the wall-clock time since the last
   step multiplied by the speed. A long gap (a throttled background tab) is capped at 100 ms, so the simulation
-  does not jump ahead. Metrics are posted about 4 times a second; particle frames at ~30 Hz.
-- The main thread uses `requestAnimationFrame` and **interpolates** particle positions between frames,
-  so animation is 60 fps even though data arrives at 30 Hz.
-- React does **not** re-render per frame. Node metric badges subscribe to a store slice that updates at ~4 Hz.
+  does not jump ahead. Metrics, including traffic per connection, are posted once a second, plus one quick
+  update 250 ms after Play or a speed or traffic change, so changes show promptly. Each update changes
+  text on the canvas, which makes the browser repaint the animated connections; at 4 Hz this made the
+  animation stutter visibly in Firefox.
+- Traffic on connections is a CSS animation, switched on and off by each connection's latest traffic, so it
+  runs smoothly although data arrives once a second.
+- Nodes and edges are built once from the design and stay the same during a run; React Flow does not rebuild
+  or re-measure them for metrics updates.
+- React does **not** re-render per frame. Node and edge labels subscribe to their part of a live metrics store that updates once a second.
   Only the canvas redraws every frame. Re-rendering the React tree at 60 Hz is a common performance
   mistake in this kind of app.
 

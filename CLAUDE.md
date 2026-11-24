@@ -52,8 +52,9 @@ significant technical decisions as ADRs in `docs/adr/` (context, decision, conse
 - **Shared schemas:** zod schemas in `@sdi/schema` are the single contract for designs, component configs,
   scenarios and results. Saved designs carry a `schemaVersion` with migrations.
 - **Guidance content is data,** separate from UI components, and rendered according to a guidance level.
-- **UI performance:** the engine runs in a Web Worker. React does not re-render per animation frame;
-  particles are drawn on a single canvas overlay.
+- **UI performance:** the engine runs in a Web Worker. React does not re-render per animation frame. Traffic
+  on connections is a CSS animation inside the edge, and live numbers reach nodes and edges through a store
+  each one subscribes to ([ADR 0002](docs/adr/0002-traffic-shown-on-connections.md)).
 
 ## Code standards
 

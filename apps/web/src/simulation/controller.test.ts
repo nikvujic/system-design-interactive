@@ -34,20 +34,20 @@ describe("SimController", () => {
     controller.handle({ type: "play" });
     wait(2_000);
     expect(last().playing).toBe(true);
-    // Metrics are posted every 250 ms; pausing posts the current numbers.
+    // Metrics are posted once a second; pausing posts the current numbers.
     controller.handle({ type: "pause" });
     expect(last().metrics.timeSeconds).toBeCloseTo(2, 1);
     expect(last().metrics.throughputPerSecond).toBeGreaterThan(1_500);
   });
 
-  it("posts metrics about four times a second, not on every tick", () => {
+  it("posts metrics once a second, not on every tick", () => {
     const { controller, posted, wait } = setup();
     controller.handle({ type: "load", design: twoServers, seed: 1 });
     controller.handle({ type: "play" });
     const before = posted.length;
-    wait(1_000);
-    expect(posted.length - before).toBeGreaterThanOrEqual(3);
-    expect(posted.length - before).toBeLessThanOrEqual(5);
+    wait(5_000);
+    expect(posted.length - before).toBeGreaterThanOrEqual(4);
+    expect(posted.length - before).toBeLessThanOrEqual(6);
   });
 
   it("stops advancing while paused", () => {
@@ -102,5 +102,38 @@ describe("SimController", () => {
     });
     controller.handle({ type: "setSpeed", speed: 0 });
     expect(posted.pop()).toMatchObject({ type: "error" });
+  });
+
+  it("sends a quick update after play and after changes, then returns to once a second", () => {
+    const { controller, posted, wait, last } = setup();
+    controller.handle({ type: "load", design: twoServers, seed: 1 });
+    controller.handle({ type: "play" });
+    const metricsPosts = () => posted.filter((m) => m.type === "metrics").length;
+
+    const afterPlay = metricsPosts();
+    wait(300);
+    expect(metricsPosts()).toBe(afterPlay + 1);
+    expect(last().metrics.throughputPerSecond).toBeGreaterThan(1_000);
+
+    wait(800);
+    expect(metricsPosts()).toBe(afterPlay + 1);
+
+    controller.handle({ type: "setRequestsPerSecond", nodeId: "users", requestsPerSecond: 3000 });
+    // No update on the change itself, one soon after.
+    expect(metricsPosts()).toBe(afterPlay + 1);
+    wait(300);
+    expect(metricsPosts()).toBe(afterPlay + 2);
+  });
+
+  it("does not post on every slider movement while playing", () => {
+    const { controller, posted, wait } = setup();
+    controller.handle({ type: "load", design: twoServers, seed: 1 });
+    controller.handle({ type: "play" });
+    wait(1_500);
+    const before = posted.length;
+    for (let rate = 2000; rate < 2500; rate += 10) {
+      controller.handle({ type: "setRequestsPerSecond", nodeId: "users", requestsPerSecond: rate });
+    }
+    expect(posted.length).toBe(before);
   });
 });

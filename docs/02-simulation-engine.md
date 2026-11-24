@@ -326,6 +326,8 @@ The engine emits three streams, at different fidelities:
 
 1. **Metrics (aggregated, always on)**
    - Per node and per edge, in rolling sim-time windows: throughput, errors by type, utilization, queue depth, in-flight, memory.
+     Implemented so far: per server (throughput, rejections, utilization, queue length, requests in service) and
+     per edge (requests per second, and rejected requests per second among those that travelled it).
      Results are collected in 250 ms buckets of simulated time, and a window (up to the last 10 s) combines the
      most recent buckets. A long-running interactive simulation therefore shows what is happening *now*;
      totals since the start would hide a recent spike behind earlier normal traffic.
@@ -342,12 +344,16 @@ The engine emits three streams, at different fidelities:
 ## 2.12 Simulation time vs. animation time
 
 At 5,000 RPS, rendering every request hop would produce too many particles for an effective visualization.
-Simulation and animation therefore use separate levels of detail:
+Simulation and animation therefore use separate levels of detail (see
+[ADR 0002](adr/0002-traffic-shown-on-connections.md)):
 
 - **Speed control**: 0.1× (slow motion to watch individual requests) ... 1× ... 100× (fast-forward a 10-minute scenario).
-- **Particle sampling**: the engine emits particles for a sample of requests, targeting a fixed visual
-  budget (e.g. ≤ 1,500 on-screen particles). A sampled request reports each hop along a connection and its
-  outcome (processed or rejected) at the node that finished it. The current implementation:
+- **Traffic on connections (default view)**: an edge animates while traffic flows on it, and its label shows
+  the per-edge metrics (§2.11). No per-request data is needed, so the cost does not grow with traffic.
+- **Particle sampling (for following individual requests, with traces)**: the engine emits particles for a
+  sample of requests, targeting a fixed visual budget (e.g. ≤ 1,500 on-screen particles). A sampled request
+  reports each hop along a connection and its outcome (processed or rejected) at the node that finished it.
+  The current implementation:
   - The caller sets a target number of sampled requests per simulated second, per traffic source, so a
     quiet source still shows particles next to a busy one.
   - Requests are sampled at random from a dedicated random stream. Turning particles on or off never
@@ -355,12 +361,10 @@ Simulation and animation therefore use separate levels of detail:
     lines up with regular patterns such as round robin and leaves some connections without particles.
   - Hops take no simulated time until links have latency (§2.6). The UI animates each hop over a short
     visual duration.
-  - Later: **particle density per edge proportional to (log-scaled) throughput**, so busy paths look busy.
-- Particles carry **status color** (ok / slow / error / retry), so a failing path turns red visibly.
-- **Queue visualization**: dots stack up at the node entrance as its queue grows, making congestion visible.
+  - Particles carry **status color** (ok / slow / error / retry) when they are drawn.
 
-The worker sends compact frames (typed arrays, ~30 Hz) to the UI: `[edgeId, progress, status]` per particle,
-and node state snapshots. No JSON per request.
+The worker sends metrics, including per-edge traffic, once a second. If request tracing is added,
+its particles can travel as compact frames (typed arrays) instead of JSON per request.
 
 ---
 

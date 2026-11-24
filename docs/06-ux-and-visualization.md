@@ -26,14 +26,15 @@ Left panel collapses to a story/problem tab in Problem mode.
 
 | Signal | Encoding |
 |---|---|
-| Request flow | Dots on edges. Density ∝ log(throughput). Speed ∝ (scaled) link latency. |
-| Request outcome | Dot color: neutral/blue = in flight, green = success returning, amber = slow (> SLO), red = error/timeout, purple = retry |
+| Traffic | A connection with traffic is a thin animated dashed line; an idle one is a plain line. Dashes stop while paused. A label on the connection shows its requests per second. See [ADR 0002](adr/0002-traffic-shown-on-connections.md). |
+| Failures | Shown as numbers: the connection label adds the share of its traffic that was rejected, there or further along. How labels and node boxes show traffic state visually is still open. |
+| Following one request | Later, with traces: a sampled request's trip through the system, colored by outcome (in flight, success returning, slow, error, retry). |
 | Node load | Node border/fill heat from utilization: calm → amber at 70% → red at 90%+ |
-| Queue build-up | Dots visibly stacking at the node's input port, plus a small queue bar on the node |
+| Queue build-up | A small queue bar on the node |
 | Node down | Greyed out, broken-link icon, edges dashed |
 | Bottleneck | Pulsing outline on the node the bottleneck detector flags |
 | Cache | Hit/miss split: hits return early (green short loop), misses continue to DB |
-| Live badge | Small per-node text: `1.2k/s · p99 45ms` (updated ~4 Hz, not every frame) |
+| Live badge | Small per-node text: `1.2k/s · p99 45ms` (updated once a second, not every frame) |
 
 **Layout:** nodes keep the position saved in the design. Nodes without one (for example in a hand-written or
 imported file) are placed automatically, in columns by distance from the traffic source, left to right.
@@ -79,7 +80,7 @@ Provide a color-blind-safe palette.
 ## 6.6 Onboarding: the first 3 minutes
 
 1. Landing → "Try it now" without an account (problem 1 runs fully client-side).
-2. Problem 1 opens already running: dots flowing, the server turning red, error counter climbing.
+2. Problem 1 opens already running: traffic flowing, the server turning red, error counter climbing.
    **The user sees failure before reading anything.**
 3. A coach mark points to the palette: "Drag a Load Balancer here."
 4. They add an LB and a second server, press run, everything turns green → success screen with the concept explanation.
@@ -103,4 +104,4 @@ Provide a color-blind-safe palette.
 
 Calm, technical, high-contrast dark theme by default (light theme available). Think Linear/Vercel
 dashboard rather than a game. Icons: neutral, vendor-agnostic shapes (no AWS icon set: licensing,
-plus we're vendor-neutral). Motion is purposeful: particles and heat, no decorative animation.
+plus we're vendor-neutral). Motion is purposeful: traffic on connections and node heat, no decorative animation.

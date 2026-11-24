@@ -32,7 +32,7 @@ time in < 2 s wall time.
 - Handler presets (direct call, cache-aside, read-replica routing).
 - Engine in a Web Worker; play/pause/speed controls. The simulation runs until stopped.
 - Live traffic control: change the request rate during a run and watch the system react.
-- Particle canvas overlay with interpolation.
+- Traffic shown on connections: animated edges with per-connection labels.
 - Node heat and live badges; metrics bar; latency/throughput/utilization charts.
 - Save/load designs to local storage; export/import JSON.
 - Undo/redo.
@@ -93,7 +93,7 @@ what is happening without additional explanation.
 |---|---|---|---|
 | Simulation feels unrealistic to experienced engineers | Medium | **Critical** | Validation suite, sourced calibration, early review by experienced engineers and SREs |
 | Handler/behavior config too complex for beginners | High | High | Presets first, advanced editor hidden; test with real users in Phase 2 |
-| Performance: animation jank or slow sim | Medium | High | Canvas overlay, worker, benchmarks in CI from Phase 0 |
+| Performance: animation jank or slow sim | Medium | High | CSS-animated edges, stable nodes with a live store, worker, benchmarks in CI from Phase 0 |
 | Scope creep (too many components before the core is good) | **High** | High | Strict waves; exit criteria per phase |
 | Content creation is slower than code | High | Medium | Authoring in-app, CI validation, templates |
 | Legal: copying existing question banks/solutions | Low (if careful) | High | Original content only; crawl for topics, never text |
